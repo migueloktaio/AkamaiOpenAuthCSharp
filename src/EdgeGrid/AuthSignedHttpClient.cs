@@ -1,4 +1,4 @@
-namespace AkamaiOpen
+namespace Akamai.EdgeGrid
 {
     public class AuthSignedHttpClient
     {

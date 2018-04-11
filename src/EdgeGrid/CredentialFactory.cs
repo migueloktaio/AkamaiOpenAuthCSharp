@@ -2,10 +2,10 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using AkamaiOpen;
-using AkamaiOpen.Exception;
+using Akamai.EdgeGrid;
+using Akamai.EdgeGrid.Exception; 
 
-namespace AkamaiOpen
+namespace Akamai.EdgeGrid
 {
     public static class CredentialFactory
     {
@@ -26,27 +26,30 @@ namespace AkamaiOpen
            return new Credential(clientToken, accessToken, clientSecret); 
         }
 
-        public static Credential CreateFromEdgeRcFile(string path, string section = "default") {
+        public static Credential CreateFromEdgeRcFile(string section = "default", string path = ".edgerc") {
             
             string clientToken = "";
             string accessToken = "";
             string clientSecret = ""; 
+            string host = "";
 
             if(File.Exists(path)) 
             {
+                Dictionary<string,string> edgercDictionary = parseEdgeRcFile(section, path);
+                clientToken =  edgercDictionary["client_secret"];
+                accessToken = edgercDictionary["access_token"];
+                clientSecret =  edgercDictionary["client_token"];
+                host = edgercDictionary["host"];
 
             }else{
-                
+                throw new System.IO.FileNotFoundException("edgerc file not found");
             }  
-           return new Credential(clientToken, accessToken, clientSecret); 
+           return new Credential(clientToken, accessToken, clientSecret, host); 
         }  
 
-        private static Dictionary<string,string> parseEdgeRcFile(string path, string section = "default"){
+        private static Dictionary<string,string> parseEdgeRcFile(string section, string path){
             
-            string clientToken = "";
-            string accessToken = "";
-            string clientSecret = ""; 
-            Dictionary<string, string> parsedCredentials = new Dictionary<string, string>();
+            Dictionary<string, string> parsedDicCredentials = new Dictionary<string, string>();
             
             string[] edgeRcFileArray = System.IO.File.ReadAllLines(path);
             string sectionToBeSearched = "[" + section + "]";
@@ -55,20 +58,26 @@ namespace AkamaiOpen
 
             if(edgeRcFileArray.Length > 0){
                 foreach(string line in edgeRcFileArray)  {
+                    if(numberOfRemainingArgs > 0 && isSectionFound){
+                       --numberOfRemainingArgs;
+                       addUniqueCredentialProperty(ref parsedDicCredentials, line, numberOfRemainingArgs);
+                    }
                     if (sectionToBeSearched.Equals(line.Trim()) && !isSectionFound){
                         isSectionFound = true;
                     }
+                    if(numberOfRemainingArgs == 0){
+                        break;
+                    }
 
-                    if(numberOfRemainingArgs > 0 && isSectionFound){
-                       --numberOfRemainingArgs;
-                       addUniqueCredentialProperty(ref parsedCredentials, line, numberOfRemainingArgs);
-                    }                   
                 }
             }
-            return parsedCredentials; 
+
+            validateCredentialParams(parsedDicCredentials);
+
+            return parsedDicCredentials; 
         }
 
-        private static void addUniqueCredentialProperty(ref Dictionary<string, string> credentialParams, string line, int numberOfRemainingArgs){
+        private static void addUniqueCredentialProperty(ref Dictionary<string, string> parsedDicCredentials, string line, int numberOfRemainingArgs){
             
             string[] propertiesToFind = new string[] { "client_secret", "host", "access_token", "client_token" }; 
             string trimmedLine = line.Trim().Replace(" ","");
@@ -79,18 +88,16 @@ namespace AkamaiOpen
             foreach(string property in propertiesToFind) {
                 
                 textToMatch = property + "=";
-                
                 if(trimmedLine.Contains(textToMatch)){
                     key = property;
                     value = trimmedLine.Split(textToMatch)[1];
-                    credentialParams.Add(key,value);
+                    if (!parsedDicCredentials.ContainsKey(key)){
+                        parsedDicCredentials.Add(key,value);    
+                    }else{
+                        throw new System.Exception("Duplicate" + key +" found. Possible causes: the credential could be declared more than once or it's taking the credential from another section");
+                    }
                 }
             }
-
-            if(numberOfRemainingArgs == 1 && credentialParams.Count < 4){
-                //throw exception
-            }
-
         }
 
         private static void validateCredentialParams (Dictionary<string, string> credentialProperty){
@@ -101,10 +108,12 @@ namespace AkamaiOpen
                 if (credentialProperty.ContainsKey(property)) {
                     if(string.IsNullOrWhiteSpace(credentialProperty[property])){
                         //throw exception
+                        throw new System.Exception("Not implemented yet");
+
                     }
                 }else{
                         //throw exception
-                    throw new CredentialPropertyNotFoundException("Error: "+ property + " could not be loaded from the edgerc file. Possible problems: syntax error, unexpected property inside the section or missing property inside file");
+                    throw new CredentialPropertyNotFoundException("Missing "+ property + " could not be loaded from the edgerc file. Possible problems: syntax error, unexpected property inside the section or missing property inside file");
                 }
             }
         }

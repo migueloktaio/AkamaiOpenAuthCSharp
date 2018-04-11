@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Security.Cryptography; 
 using System.Text; 
 
-namespace AkamaiOpen.Authentication
+namespace Akamai.EdgeGrid
 {
     public class SignHttpClient
     {

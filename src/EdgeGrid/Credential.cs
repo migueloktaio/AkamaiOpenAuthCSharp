@@ -1,4 +1,4 @@
-namespace AkamaiOpen
+namespace Akamai.EdgeGrid
 {
     public class Credential
     {
@@ -24,8 +24,8 @@ namespace AkamaiOpen
             this._clientToken = clientToken;
 			this._accessToken = accessToken;
 			this._clientSecret = clientSecret;
-			this._host = host;
 		}
+
 		public string ClientToken
 		{
 			get
@@ -45,14 +45,6 @@ namespace AkamaiOpen
 			get
 			{
 				return this._clientSecret;
-			}
-		}
-
-		public string Host
-		{
-			get
-			{
-				return this._host;
 			}
 		}
 

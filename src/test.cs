@@ -1,13 +1,13 @@
 ﻿using System;
-using AkamaiOpen;
-using AkamaiOpen.Authentication;
+using Akamai;
+using Akamai.EdgeGrid;
 using System.Threading.Tasks;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Collections.Generic;
 using System.Runtime.Serialization.Json;
 
-namespace AkamaiOpen
+namespace Akamai
 {
     public class test
     {
@@ -21,15 +21,12 @@ namespace AkamaiOpen
 		string ClientSecret = "dej9d";        
         
     
-        AkamaiOpen.Authentication.Credential credentialEnv = AkamaiOpen.Authentication.CredentialFactory.CreateFromEnvironment();
-        AkamaiOpen.Authentication.Credential credentialFile = AkamaiOpen.Authentication.CredentialFactory.CreateFromEdgeRcFile("default", "/Users/miguel.chang/Documents/AkamaiOpen/auth.edgerc");
-        AkamaiOpen.Authentication.Credential credential = new AkamaiOpen.Authentication.Credential(ClientToken, AccessToken, ClientSecret);
+        Akamai.EdgeGrid.Credential credentialEnv = Akamai.EdgeGrid.CredentialFactory.CreateFromEnvironment();
+        Akamai.EdgeGrid.Credential credentialFile = Akamai.EdgeGrid.CredentialFactory.CreateFromEdgeRcFile("default", "/Users/miguel.chang/Documents/akamai/auth.edgerc");
+        Akamai.EdgeGrid.Credential credential = new Akamai.EdgeGrid.Credential(ClientToken, AccessToken, ClientSecret);
 
             bool areCredentialsValid = credential.isValid;
-            var serializer = new DataContractJsonSerializer(typeof(AkamaiOpen.Authentication.Credential));
-
-            Console.Write("Press any key to continue...");
-            Console.ReadKey(true);
+            var serializer = new DataContractJsonSerializer(typeof(Akamai.EdgeGrid.Credential));
 
         }
 

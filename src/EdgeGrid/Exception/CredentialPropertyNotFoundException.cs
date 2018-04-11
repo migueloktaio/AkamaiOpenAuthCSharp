@@ -1,6 +1,6 @@
 using System;
 
-namespace AkamaiOpen.Exception
+namespace Akamai.EdgeGrid.Exception
 {
     public class CredentialPropertyNotFoundException : System.Exception
     {
